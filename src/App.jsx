@@ -282,17 +282,21 @@ async function fetchLiveScores(matches, onUpdated, onStatus) {
   const updated=matches.map(m=>{
     const ev = played.find(e => teamsMatch(m.home, e.strHomeTeam) && teamsMatch(m.away, e.strAwayTeam));
     if(!ev) return m;
-    // Preserve any manually-entered scorers
-    const newR={
-      home:String(ev.intHomeScore),
-      away:String(ev.intAwayScore),
-      homeScorers:m.result?.homeScorers||[],
-      awayScorers:m.result?.awayScorers||[],
-      autoSynced:true
-    };
-    if(m.result?.home===newR.home && m.result?.away===newR.away && m.result?.autoSynced) return m;
+    const newHome=String(ev.intHomeScore), newAway=String(ev.intAwayScore);
+    // Only update if the score actually changed. NEVER touch scorers — they're entered manually.
+    if(m.result?.home===newHome && m.result?.away===newAway) return m;
     anyUpdated=true;
-    return{...m,result:{...m.result,...newR}};
+    return {
+      ...m,
+      result: {
+        ...m.result,                              // keep everything (incl. manually-set scorers)
+        home: newHome,
+        away: newAway,
+        homeScorers: m.result?.homeScorers || [], // explicitly preserve
+        awayScorers: m.result?.awayScorers || [],
+        autoSynced: true
+      }
+    };
   });
   if(anyUpdated){ onUpdated(updated); onStatus && onStatus("Scores updated!"); }
   else onStatus && onStatus("Already up to date");
@@ -433,7 +437,11 @@ export default function App() {
     const sync=async()=>{
       if(isBlackoutWindow()) return;
       setApiSyncing(true);
-      await fetchLiveScores(matches, updated=>{
+      // Always pull the FRESHEST matches from Firebase first, so we never
+      // overwrite scorers that were entered after this effect was set up.
+      const fresh = await fbGet("matches_v2");
+      const current = fresh ? Object.values(fresh).sort((a,b)=>a.id-b.id) : matches;
+      await fetchLiveScores(current, updated=>{
         setMatches(updated);
         fbSet("matches_v2",Object.fromEntries(updated.map(m=>[m.id,m])));
       });
@@ -825,7 +833,7 @@ export default function App() {
         {page==="admin"&&isAdmin&&<div className="fi">
           <div style={{fontFamily:"'Bebas Neue',Impact,sans-serif",fontSize:26,letterSpacing:3,color:T.gold,marginBottom:20,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
             ADMIN PANEL
-            <button onClick={async()=>{setApiSyncing(true);await fetchLiveScores(matches,upd=>{setMatches(upd);fbSet("matches_v2",Object.fromEntries(upd.map(m=>[m.id,m])));},msg=>showToast(msg));setLastApiSync(new Date());setApiSyncing(false);}} style={{background:"rgba(68,204,136,.15)",border:"1px solid rgba(68,204,136,.3)",color:"#44cc88",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:12}}>{apiSyncing?"⏳ Syncing…":"⚽ Sync Scores"}</button>
+            <button onClick={async()=>{setApiSyncing(true);const fresh=await fbGet("matches_v2");const current=fresh?Object.values(fresh).sort((a,b)=>a.id-b.id):matches;await fetchLiveScores(current,upd=>{setMatches(upd);fbSet("matches_v2",Object.fromEntries(upd.map(m=>[m.id,m])));},msg=>showToast(msg));setLastApiSync(new Date());setApiSyncing(false);}} style={{background:"rgba(68,204,136,.15)",border:"1px solid rgba(68,204,136,.3)",color:"#44cc88",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:12}}>{apiSyncing?"⏳ Syncing…":"⚽ Sync Scores"}</button>
           </div>
 
           {/* ── League management ── */}
