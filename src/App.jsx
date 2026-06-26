@@ -112,7 +112,7 @@ const DEFAULT_MATCHES = [
   {id:38,phase:"Group G",home:"Iran 🇮🇷",away:"New Zealand 🇳🇿",date:"Jun 16",kickoffTime:"2026-06-16T04:00+03:00"},
   {id:39,phase:"Group G",home:"Belgium 🇧🇪",away:"Iran 🇮🇷",date:"Jun 21",kickoffTime:"2026-06-21T22:00+03:00"},
   {id:40,phase:"Group G",home:"New Zealand 🇳🇿",away:"Egypt 🇪🇬",date:"Jun 22",kickoffTime:"2026-06-22T04:00+03:00"},
-  {id:41,phase:"Group G",home:"Egypt 🇪🇬",away:"Iran 🇮🇷",date:"Jun 27",kickoffTime:"2026-06-27T03:00+03:00"},
+  {id:41,phase:"Group G",home:"Egypt 🇪🇬",away:"Iran 🇮🇷",date:"Jun 27",kickoffTime:"2026-06-27T06:00+03:00"},
   {id:42,phase:"Group G",home:"New Zealand 🇳🇿",away:"Belgium 🇧🇪",date:"Jun 27",kickoffTime:"2026-06-27T06:00+03:00"},
   {id:43,phase:"Group H",home:"Spain 🇪🇸",away:"Cape Verde 🇨🇻",date:"Jun 15",kickoffTime:"2026-06-15T19:00+03:00"},
   {id:44,phase:"Group H",home:"Saudi Arabia 🇸🇦",away:"Uruguay 🇺🇾",date:"Jun 16",kickoffTime:"2026-06-16T01:00+03:00"},
